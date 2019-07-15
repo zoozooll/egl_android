@@ -1,2 +1,2 @@
 # egl_android
-EGL project for android
+Android EGL library without GLSurfaceView
