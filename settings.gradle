@@ -1,1 +1,1 @@
-include ':app', ':egllibrary', ':native_egl'
+include ':app', ':egllibrary', ':native_egl', ':glholder'
