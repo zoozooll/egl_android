@@ -1,25 +1,28 @@
+
 package com.aaron.eglholder;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
-import android.opengl.EGL14;
-import android.opengl.EGLExt;
-import android.os.Build;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.TextureView;
-import android.view.View;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+import java.io.Writer;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGL11;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
-import java.lang.ref.WeakReference;
+import javax.microedition.khronos.opengles.GL10;
 
 public class EGLHolder {
-
-    final static String TAG = "EGLHolder";
+    final static String TAG = "GLSurfaceView";
     final static boolean LOG_ATTACH_DETACH = false;
     final static boolean LOG_THREADS = false;
     final static boolean LOG_PAUSE_RESUME = false;
@@ -56,29 +59,13 @@ public class EGLHolder {
     public final static int DEBUG_CHECK_GL_ERROR = 1;
 
     /**
-     * Log GL calls to the system log at "verbose" level with tag "EGLHolder".
+     * Log GL calls to the system log at "verbose" level with tag "GLSurfaceView".
      *
      * @see #getDebugFlags
      * @see #setDebugFlags
      */
     public final static int DEBUG_LOG_GL_CALLS = 2;
 
-    static final GLThreadManager sGLThreadManager = new GLThreadManager();
-
-    private final WeakReference<EGLHolder> mThisWeakRef = new WeakReference<>(this);
-    private GLThread mGLThread;
-    Renderer mRenderer;
-    private boolean mDetached;
-    EGLConfigChooser mEGLConfigChooser;
-    EGLContextFactory mEGLContextFactory;
-    EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
-    EGLWindowSurfaceFactory mEGLRecordableSurfaceFactory;
-    EGLWindowSurfaceFactory mEGLImageReaderSurfaceFactory;
-    GLWrapper mGLWrapper;
-    public int mDebugFlags;
-    private int mEGLContextClientVersion;
-    boolean mPreserveEGLContextOnPause;
-    private SurfaceTexture surfaceTexture;
 
     @Override
     protected void finalize() throws Throwable {
@@ -104,11 +91,14 @@ public class EGLHolder {
      * Wrapping is typically used for debugging purposes.
      * <p>
      * The default value is null.
-     *
      * @param glWrapper the new GLWrapper
      */
     public void setGLWrapper(GLWrapper glWrapper) {
         mGLWrapper = glWrapper;
+    }
+
+    public void setSurface(Object surface) {
+        this.surface = surface;
     }
 
     /**
@@ -116,7 +106,6 @@ public class EGLHolder {
      * constructed by OR-together zero or more
      * of the DEBUG_CHECK_* constants. The debug flags take effect
      * whenever a surface is created. The default value is zero.
-     *
      * @param debugFlags the new debug flags
      * @see #DEBUG_CHECK_GL_ERROR
      * @see #DEBUG_LOG_GL_CALLS
@@ -127,7 +116,6 @@ public class EGLHolder {
 
     /**
      * Get the current value of the debug flags.
-     *
      * @return the current value of the debug flags.
      */
     public int getDebugFlags() {
@@ -135,19 +123,21 @@ public class EGLHolder {
     }
 
     /**
-     * Control whether the EGL context is preserved when the EGLHolder is paused and
+     * Control whether the EGL context is preserved when the GLSurfaceView is paused and
      * resumed.
      * <p>
-     * If set to true, then the EGL context may be preserved when the EGLHolder is paused.
-     * Whether the EGL context is actually preserved or not depends upon whether the
-     * Android device that the program is running on can support an arbitrary number of EGL
-     * contexts or not. Devices that can only support a limited number of EGL contexts must
-     * release the  EGL context in order to allow multiple applications to share the GPU.
+     * If set to true, then the EGL context may be preserved when the GLSurfaceView is paused.
      * <p>
-     * If set to false, the EGL context will be released when the EGLHolder is paused,
-     * and recreated when the EGLHolder is resumed.
+     * Prior to API level 11, whether the EGL context is actually preserved or not
+     * depends upon whether the Android device can support an arbitrary number of
+     * EGL contexts or not. Devices that can only support a limited number of EGL
+     * contexts must release the EGL context in order to allow multiple applications
+     * to share the GPU.
      * <p>
+     * If set to false, the EGL context will be released when the GLSurfaceView is paused,
+     * and recreated when the GLSurfaceView is resumed.
      * <p>
+     *
      * The default is false.
      *
      * @param preserveOnPause preserve the EGL context when paused
@@ -167,8 +157,8 @@ public class EGLHolder {
      * Set the renderer associated with this view. Also starts the thread that
      * will call the renderer, which in turn causes the rendering to start.
      * <p>This method should be called once and only once in the life-cycle of
-     * a EGLHolder.
-     * <p>The following EGLHolder methods can only be called <em>before</em>
+     * a GLSurfaceView.
+     * <p>The following GLSurfaceView methods can only be called <em>before</em>
      * setRenderer is called:
      * <ul>
      * <li>{@link #setEGLConfigChooser(boolean)}
@@ -176,12 +166,12 @@ public class EGLHolder {
      * <li>{@link #setEGLConfigChooser(int, int, int, int, int, int)}
      * </ul>
      * <p>
-     * The following EGLHolder methods can only be called <em>after</em>
+     * The following GLSurfaceView methods can only be called <em>after</em>
      * setRenderer is called:
      * <ul>
      * <li>{@link #getRenderMode()}
-     * <li>{@link #onPause()}
-     * <li>{@link #onResume()}
+     * <li>{@link #pause()}
+     * <li>{@link #resume()}
      * <li>{@link #queueEvent(Runnable)}
      * <li>{@link #requestRender()}
      * <li>{@link #setRenderMode(int)}
@@ -192,7 +182,7 @@ public class EGLHolder {
     public void setRenderer(Renderer renderer) {
         checkRenderThreadState();
         if (mEGLConfigChooser == null) {
-            mEGLConfigChooser = new RecordableEGLConfigChooser(3);
+            mEGLConfigChooser = new SimpleEGLConfigChooser(true);
         }
         if (mEGLContextFactory == null) {
             mEGLContextFactory = new DefaultContextFactory(3);
@@ -244,7 +234,6 @@ public class EGLHolder {
      * view will choose an EGLConfig that is compatible with the current
      * android.view.Surface, with a depth buffer depth of
      * at least 16 bits.
-     *
      * @param configChooser
      */
     public void setEGLConfigChooser(EGLConfigChooser configChooser) {
@@ -281,6 +270,7 @@ public class EGLHolder {
      * If no setEGLConfigChooser method is called, then by default the
      * view will choose an RGB_888 surface with a depth buffer depth of
      * at least 16 bits.
+     *
      */
     public void setEGLConfigChooser(int redSize, int greenSize, int blueSize,
                                     int alphaSize, int depthSize, int stencilSize) {
@@ -312,7 +302,6 @@ public class EGLHolder {
      * If
      * {@link #setEGLConfigChooser(EGLConfigChooser)} has been called, then the supplied
      * EGLConfigChooser is responsible for choosing an OpenGL ES 2.0-compatible config.
-     *
      * @param version The EGLContext client version to choose. Use 2 for OpenGL ES 2.0
      */
     public void setEGLContextClientVersion(int version) {
@@ -343,7 +332,6 @@ public class EGLHolder {
     /**
      * Get the current rendering mode. May be called
      * from any thread. Must not be called before a renderer has been set.
-     *
      * @return the current rendering mode.
      * @see #RENDERMODE_CONTINUOUSLY
      * @see #RENDERMODE_WHEN_DIRTY
@@ -364,53 +352,62 @@ public class EGLHolder {
     }
 
     /**
-     * This method is part of the SurfaceHolder.Callback interface, and is
-     * not normally called or subclassed by clients of EGLHolder.
+     * This method is part of the SurfaceHolder.Callback or SurfaceTexture interface, and is
+     * not normally called or subclassed by clients of GLSurfaceView.
      */
-    public void surfaceCreated(SurfaceTexture texture) {
-        surfaceTexture = texture;
+    public void surfaceCreated(Object surface) {
+        this.surface = surface;
         mGLThread.surfaceCreated();
     }
 
     /**
      * This method is part of the SurfaceHolder.Callback interface, and is
-     * not normally called or subclassed by clients of EGLHolder.
+     * not normally called or subclassed by clients of GLSurfaceView.
      */
-    public void surfaceDestroyed(SurfaceTexture texture) {
+    public void surfaceDestroyed() {
         // Surface will be destroyed when we return
         mGLThread.surfaceDestroyed();
     }
 
     /**
      * This method is part of the SurfaceHolder.Callback interface, and is
-     * not normally called or subclassed by clients of EGLHolder.
+     * not normally called or subclassed by clients of GLSurfaceView.
      */
-    public void surfaceChanged(SurfaceTexture texture, int format, int w, int h) {
+    public void surfaceChanged(int w, int h) {
         mGLThread.onWindowResize(w, h);
     }
 
-    public SurfaceTexture getSurfaceTexture() {
-        return surfaceTexture;
+    public void requestRenderAndNotify(Runnable finishDrawing) {
+        if (mGLThread != null) {
+            mGLThread.requestRenderAndNotify(finishDrawing);
+        }
     }
 
+
     /**
-     * Inform the view that the activity is paused. The owner of this view must
-     * call this method when the activity is paused. Calling this method will
-     * pause the rendering thread.
+     * Pause the rendering thread, optionally tearing down the EGL context
+     * depending upon the value of {@link #setPreserveEGLContextOnPause(boolean)}.
+     *
+     * This method should be called when it is no longer desirable for the
+     * GLSurfaceView to continue rendering, such as in response to
+     * Activity.onStop.
+     *
      * Must not be called before a renderer has been set.
      */
-    public void onPause() {
+    public void pause() {
         mGLThread.onPause();
     }
 
     /**
-     * Inform the view that the activity is resumed. The owner of this view must
-     * call this method when the activity is resumed. Calling this method will
-     * recreate the OpenGL display and resume the rendering
-     * thread.
+     * Resumes the rendering thread, re-creating the OpenGL context if necessary. It
+     * is the counterpart to {@link #pause()}.
+     *
+     * This method should typically be called in
+     * Activity.onStart.
+     *
      * Must not be called before a renderer has been set.
      */
-    public void onResume() {
+    public void resume() {
         mGLThread.onResume();
     }
 
@@ -418,18 +415,13 @@ public class EGLHolder {
      * Queue a runnable to be run on the GL rendering thread. This can be used
      * to communicate with the Renderer on the rendering thread.
      * Must not be called before a renderer has been set.
-     *
      * @param r the runnable to be run on the GL rendering thread.
      */
     public void queueEvent(Runnable r) {
         mGLThread.queueEvent(r);
     }
 
-    /**
-     * This method is used as part of the View class and is not normally
-     * called or subclassed by clients of EGLHolder.
-     */
-    protected void start() {
+    public void start() {
         if (LOG_ATTACH_DETACH) {
             Log.d(TAG, "onAttachedToWindow reattach =" + mDetached);
         }
@@ -447,12 +439,7 @@ public class EGLHolder {
         mDetached = false;
     }
 
-    /**
-     * This method is used as part of the View class and is not normally
-     * called or subclassed by clients of EGLHolder.
-     * Must not be called before a renderer has been set.
-     */
-    protected void stop() {
+    public void stop() {
         if (LOG_ATTACH_DETACH) {
             Log.d(TAG, "onDetachedFromWindow");
         }
@@ -462,40 +449,7 @@ public class EGLHolder {
         mDetached = true;
     }
 
-
-
-    /*public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                               int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        surfaceChanged(getSurfaceTexture(), 0, right - left, bottom - top);
-    }
-
-    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        surfaceCreated(surface);
-        surfaceChanged(surface, 0, width, height);
-    }
-
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        surfaceChanged(surface, 0, width, height);
-    }
-
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        surfaceDestroyed(surface);
-        return true;
-    }
-
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        requestRender();
-    }*/
-
-    /**
-     * This class will choose a RGB_888 surface with
-     * or without a depth buffer.
-     */
-    private class SimpleEGLConfigChooser extends ComponentSizeChooser {
-        public SimpleEGLConfigChooser(boolean withDepthBuffer) {
-            super(8, 8, 8, 0, withDepthBuffer ? 16 : 0, 0);
-        }
-    }
+    // ----------------------------------------------------------------------
 
     private void checkRenderThreadState() {
         if (mGLThread != null) {
@@ -504,5 +458,19 @@ public class EGLHolder {
         }
     }
 
+    static final GLThreadManager sGLThreadManager = new GLThreadManager();
 
+    final WeakReference<EGLHolder> mThisWeakRef =
+            new WeakReference<>(this);
+    GLThread mGLThread;
+    Renderer mRenderer;
+    private boolean mDetached;
+    EGLConfigChooser mEGLConfigChooser;
+    EGLContextFactory mEGLContextFactory;
+    EGLWindowSurfaceFactory mEGLWindowSurfaceFactory;
+    GLWrapper mGLWrapper;
+    Object surface;
+    int mDebugFlags;
+    private int mEGLContextClientVersion;
+    boolean mPreserveEGLContextOnPause;
 }
