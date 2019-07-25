@@ -1,6 +1,9 @@
 package com.aaron.egl;
 
-import android.opengl.*;
+import android.opengl.EGL14;
+import android.opengl.EGLConfig;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
 
 class DefaultContextFactory implements EGLContextFactory {
     private int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
@@ -23,7 +26,7 @@ class DefaultContextFactory implements EGLContextFactory {
     }
 
     public boolean destroyContext(EGLDisplay display,
-                               EGLContext context) {
+                                  EGLContext context) {
         if (!EGL14.eglDestroyContext(display, context)) {
             return false;
 //            EglHelper.throwEglException("eglDestroyContext " + egl.eglGetError());

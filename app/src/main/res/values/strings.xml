@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">egllibrary</string>
+    <string name="title_activity_light">LightActivity</string>
 </resources>

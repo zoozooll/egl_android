@@ -3,8 +3,6 @@ package com.aaron.egl
 import android.os.*
 import android.util.Log
 
-import android.opengl.EGL14.*
-
 class BaseEGLHolder {
 
     private var mGLThread: HandlerThread? = null
@@ -106,7 +104,7 @@ class BaseEGLHolder {
         mEglHelper = EglHelper()
         mEglHelper?.createEglContext()
         mEglHelper?.createSurface(displayObject)
-        Log.i(TAG, "onGLCreate ${ SystemClock.uptimeMillis() - start }")
+        Log.i(TAG, "onGLCreate ${SystemClock.uptimeMillis() - start}")
         mEGLBinder.onEglCreated(
             mEglHelper!!.mEglContext, mEglHelper!!.mEglDisplay, mEglHelper!!.mEglSurface, mEglHelper!!.mEglConfig
         )

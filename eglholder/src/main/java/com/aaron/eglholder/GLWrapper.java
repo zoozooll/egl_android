@@ -21,7 +21,6 @@ import javax.microedition.khronos.opengles.GL;
  *     }
  * }
  * </pre>
- *
  */
 public interface GLWrapper {
     /**

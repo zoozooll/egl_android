@@ -3,17 +3,12 @@ package com.aaron.eglholder;
 import android.opengl.GLDebugHelper;
 import android.util.Log;
 
+import javax.microedition.khronos.egl.*;
+import javax.microedition.khronos.opengles.GL;
 import java.io.Writer;
 import java.lang.ref.WeakReference;
 
-import javax.microedition.khronos.egl.*;
-import javax.microedition.khronos.opengles.GL;
-
-import static com.aaron.eglholder.EGLHolder.DEBUG_CHECK_GL_ERROR;
-import static com.aaron.eglholder.EGLHolder.DEBUG_LOG_GL_CALLS;
-import static com.aaron.eglholder.EGLHolder.LOG_THREADS;
-import static com.aaron.eglholder.EGLHolder.LOG_EGL;
-import static com.aaron.eglholder.EGLHolder.TAG;
+import static com.aaron.eglholder.EGLHolder.*;
 
 /**
  * An EGL helper class.
@@ -54,7 +49,7 @@ class EglHelper {
          * We can now initialize EGL for that display
          */
         int[] version = new int[2];
-        if(!mEgl.eglInitialize(mEglDisplay, version)) {
+        if (!mEgl.eglInitialize(mEglDisplay, version)) {
             throw new RuntimeException("eglInitialize failed");
         }
         EGLHolder view = mGLSurfaceViewWeakRef.get();
@@ -147,6 +142,7 @@ class EglHelper {
 
     /**
      * Create a GL object for the current EGL context.
+     *
      * @return
      */
     GL createGL() {
@@ -175,10 +171,11 @@ class EglHelper {
 
     /**
      * Display the current render surface.
+     *
      * @return the EGL error code from eglSwapBuffers.
      */
     public int swap() {
-        if (! mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
+        if (!mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
             return mEgl.eglGetError();
         }
         return EGL10.EGL_SUCCESS;

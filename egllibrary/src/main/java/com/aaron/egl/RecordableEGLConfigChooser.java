@@ -40,7 +40,7 @@ class RecordableEGLConfigChooser implements EGLConfigChooser {
         }
 
         EGLConfig[] configs = new EGLConfig[numConfigs];
-        if (!EGL14.eglChooseConfig(display, mConfigSpec, 0, configs, 0,  numConfigs,
+        if (!EGL14.eglChooseConfig(display, mConfigSpec, 0, configs, 0, numConfigs,
                 num_config, 0)) {
             throw new IllegalArgumentException("eglChooseConfig#2 failed");
         }

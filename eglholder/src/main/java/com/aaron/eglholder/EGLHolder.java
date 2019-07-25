@@ -1,25 +1,9 @@
-
 package com.aaron.eglholder;
 
-import android.content.Context;
-import android.os.Trace;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 
-import java.io.Writer;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGL11;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
-import javax.microedition.khronos.opengles.GL10;
+import java.lang.ref.WeakReference;
 
 public class EGLHolder {
     final static String TAG = "GLSurfaceView";
@@ -91,6 +75,7 @@ public class EGLHolder {
      * Wrapping is typically used for debugging purposes.
      * <p>
      * The default value is null.
+     *
      * @param glWrapper the new GLWrapper
      */
     public void setGLWrapper(GLWrapper glWrapper) {
@@ -106,6 +91,7 @@ public class EGLHolder {
      * constructed by OR-together zero or more
      * of the DEBUG_CHECK_* constants. The debug flags take effect
      * whenever a surface is created. The default value is zero.
+     *
      * @param debugFlags the new debug flags
      * @see #DEBUG_CHECK_GL_ERROR
      * @see #DEBUG_LOG_GL_CALLS
@@ -116,6 +102,7 @@ public class EGLHolder {
 
     /**
      * Get the current value of the debug flags.
+     *
      * @return the current value of the debug flags.
      */
     public int getDebugFlags() {
@@ -137,7 +124,7 @@ public class EGLHolder {
      * If set to false, the EGL context will be released when the GLSurfaceView is paused,
      * and recreated when the GLSurfaceView is resumed.
      * <p>
-     *
+     * <p>
      * The default is false.
      *
      * @param preserveOnPause preserve the EGL context when paused
@@ -234,6 +221,7 @@ public class EGLHolder {
      * view will choose an EGLConfig that is compatible with the current
      * android.view.Surface, with a depth buffer depth of
      * at least 16 bits.
+     *
      * @param configChooser
      */
     public void setEGLConfigChooser(EGLConfigChooser configChooser) {
@@ -270,7 +258,6 @@ public class EGLHolder {
      * If no setEGLConfigChooser method is called, then by default the
      * view will choose an RGB_888 surface with a depth buffer depth of
      * at least 16 bits.
-     *
      */
     public void setEGLConfigChooser(int redSize, int greenSize, int blueSize,
                                     int alphaSize, int depthSize, int stencilSize) {
@@ -302,6 +289,7 @@ public class EGLHolder {
      * If
      * {@link #setEGLConfigChooser(EGLConfigChooser)} has been called, then the supplied
      * EGLConfigChooser is responsible for choosing an OpenGL ES 2.0-compatible config.
+     *
      * @param version The EGLContext client version to choose. Use 2 for OpenGL ES 2.0
      */
     public void setEGLContextClientVersion(int version) {
@@ -332,6 +320,7 @@ public class EGLHolder {
     /**
      * Get the current rendering mode. May be called
      * from any thread. Must not be called before a renderer has been set.
+     *
      * @return the current rendering mode.
      * @see #RENDERMODE_CONTINUOUSLY
      * @see #RENDERMODE_WHEN_DIRTY
@@ -387,11 +376,11 @@ public class EGLHolder {
     /**
      * Pause the rendering thread, optionally tearing down the EGL context
      * depending upon the value of {@link #setPreserveEGLContextOnPause(boolean)}.
-     *
+     * <p>
      * This method should be called when it is no longer desirable for the
      * GLSurfaceView to continue rendering, such as in response to
      * Activity.onStop.
-     *
+     * <p>
      * Must not be called before a renderer has been set.
      */
     public void pause() {
@@ -401,10 +390,10 @@ public class EGLHolder {
     /**
      * Resumes the rendering thread, re-creating the OpenGL context if necessary. It
      * is the counterpart to {@link #pause()}.
-     *
+     * <p>
      * This method should typically be called in
      * Activity.onStart.
-     *
+     * <p>
      * Must not be called before a renderer has been set.
      */
     public void resume() {
@@ -415,6 +404,7 @@ public class EGLHolder {
      * Queue a runnable to be run on the GL rendering thread. This can be used
      * to communicate with the Renderer on the rendering thread.
      * Must not be called before a renderer has been set.
+     *
      * @param r the runnable to be run on the GL rendering thread.
      */
     public void queueEvent(Runnable r) {

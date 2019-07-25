@@ -1,12 +1,15 @@
 package com.aaron.egl
 
 import android.content.ContentValues.TAG
-import android.opengl.*
 import android.opengl.EGL14.*
+import android.opengl.EGLConfig
+import android.opengl.EGLContext
+import android.opengl.EGLDisplay
+import android.opengl.EGLSurface
 import android.util.Log
 
 internal class EglHelper {
-//    var mEgl: EGL10? = null
+    //    var mEgl: EGL10? = null
     var mEglDisplay: EGLDisplay? = null
     var mEglSurface: EGLSurface? = null
     var mEglConfig: EGLConfig? = null
@@ -32,7 +35,7 @@ internal class EglHelper {
             }
         }
 
-    fun createEglContext() : Boolean {
+    fun createEglContext(): Boolean {
         if (mEGLConfigChooser == null) {
             mEGLConfigChooser = RecordableEGLConfigChooser(mEGLContextClientVersion)
         }
@@ -101,7 +104,7 @@ internal class EglHelper {
         /*
          * Create an EGL surface we can render into.
          */
-        mEglSurface = mEGLWindowSurfaceFactory!!.createWindowSurface( mEglDisplay, mEglConfig)
+        mEglSurface = mEGLWindowSurfaceFactory!!.createWindowSurface(mEglDisplay, mEglConfig)
 
         if (mEglSurface == null || mEglSurface === EGL_NO_SURFACE) {
             val error = eglGetError()

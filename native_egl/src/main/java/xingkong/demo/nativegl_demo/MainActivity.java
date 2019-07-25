@@ -2,7 +2,6 @@ package xingkong.demo.nativegl_demo;
 
 import android.os.Bundle;
 import android.view.SurfaceView;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
