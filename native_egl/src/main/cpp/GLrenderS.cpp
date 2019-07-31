@@ -11,7 +11,7 @@ auto tVertexShader =
         "varying vec2 v_TextureCoordinates;\n"
         "void main() {\n"
         "   v_TextureCoordinates = a_TextureCoordinates;\n"
-        "   gl_Position = vec4(a_Position,0,1.0);\n"
+        "   gl_Position = vec4(a_Position, 0, 1.0);\n"
         "}\n";
 auto tFragmentShader =
         "precision mediump float;\n"
@@ -20,22 +20,22 @@ auto tFragmentShader =
         "vec4 color_temp;\n"
         "void main() {\n"
         "   color_temp = texture2D(u_TextureUnit, v_TextureCoordinates);\n" //使用v_TextureCoordinates采样u_TextureUnit中的颜色
-        "   if(color_temp.r<0.3125){\n"        //使用伪彩色映射
-        "       color_temp=vec4(1.0-2.9875*color_temp.r,1.0-2.4*color_temp.r,1.0-0.1875*color_temp.r,1.0);\n"
+        "   if(color_temp.r < 0.3125){\n"        //使用伪彩色映射
+        "       color_temp=vec4(1.0 - 2.9875 * color_temp.r,1.0 - 2.4 * color_temp.r, 1.0 - 0.1875 * color_temp.r, 1.0);\n"
         "   }\n"
-        "   else if(color_temp.r<0.391){\n"
-        "       color_temp=vec4(0.0627+0.8*(color_temp.r-0.3125),0.25+6.4*(color_temp.r-0.3125),0.9375-11.2*(color_temp.r-0.3125),1.0);\n"
+        "   else if(color_temp.r < 0.391){\n"
+        "       color_temp=vec4(0.0627 + 0.8 * (color_temp.r - 0.3125), 0.25 + 6.4 * (color_temp.r - 0.3125), 0.9375 - 11.2 * (color_temp.r - 0.3125), 1.0);\n"
         "   }\n"
-        "   else if(color_temp.r<0.46875){\n"
-        "       color_temp=vec4(0.125+8.0*(color_temp.r-0.391),0.75-1.6*(color_temp.r-0.391),0.0625-0.4*(color_temp.r-0.391),1.0);\n"
+        "   else if(color_temp.r < 0.46875){\n"
+        "       color_temp = vec4(0.125 + 8.0 * (color_temp.r - 0.391), 0.75 - 1.6 * (color_temp.r - 0.391), 0.0625 - 0.4 * (color_temp.r - 0.391), 1.0);\n"
         "   }\n"
-        "   else if(color_temp.r<0.625){\n"
-        "       color_temp=vec4(0.75+1.2*(color_temp.r-0.46875),0.625-1.6*(color_temp.r-0.46875),0.03127-0.2*(color_temp.r-0.46875),1.0);\n"
+        "   else if(color_temp.r < 0.625){\n"
+        "       color_temp = vec4(0.75 + 1.2 * (color_temp.r - 0.46875), 0.625 - 1.6 * (color_temp.r - 0.46875), 0.03127 - 0.2 * (color_temp.r - 0.46875), 1.0);\n"
         "   }\n"
         "   else{\n"
-        "       color_temp=vec4(0.9375-1.2632*(color_temp.r-0.625),0.375-1.0*(color_temp.r-0.625),0.0,1.0);\n"
+        "       color_temp = vec4(0.9375 - 1.2632 * (color_temp.r - 0.625), 0.375 - 1.0 * (color_temp.r - 0.625), 0.0, 1.0);\n"
         "   }\n"
-        "   gl_FragColor=color_temp;\n"
+        "   gl_FragColor = color_temp;\n"
         "}\n";
 
 

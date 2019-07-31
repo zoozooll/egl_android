@@ -12,6 +12,15 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning">
         <activity
+                android:name="com.aaron.sample.matrixdemo.TransformActivity"
+                android:label="@string/title_activity_matrix"
+                android:parentActivityName=".MainActivity"
+                android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="com.aaron.egllib.MainActivity"/>
+        </activity>
+        <activity
                 android:name="com.aaron.sample.light.LightActivity"
                 android:label="@string/title_activity_light"
                 android:parentActivityName=".MainActivity"

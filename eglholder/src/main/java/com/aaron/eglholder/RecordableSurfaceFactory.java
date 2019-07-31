@@ -10,7 +10,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 
 public class RecordableSurfaceFactory implements EGLWindowSurfaceFactory {
 
-    private static final String TAG = "DefaultWindowSurfaceFactory";
+    private static final String TAG = "DefaultWindowSurfaceFactory".substring(0, 23);
 
     private boolean active;
     private Surface mRecorderSurface;
